@@ -1,0 +1,14 @@
+<h1>Tournois League of Legends</h1>
+
+<div *ngIf="tournaments.length > 0; else loading">
+  <div *ngFor="let tournament of tournaments" class="tournament-card">
+    <h2>{{ tournament.name }}</h2>
+    <p>Début: {{ tournament.begin_at | date: 'dd/MM/yyyy' }}</p>
+    <p>Fin: {{ tournament.end_at | date: 'dd/MM/yyyy' }}</p>
+    <p>Ligue: {{ tournament.league?.name || 'Non spécifié' }}</p>
+  </div>
+</div>
+
+<ng-template #loading>
+  <p>Chargement des tournois...</p>
+</ng-template>
