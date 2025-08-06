@@ -1,14 +1,57 @@
-<h1>Tournois League of Legends</h1>
+<h1>Ligues League of Legends</h1>
 
-<div *ngIf="tournaments.length > 0; else loading">
-  <div *ngFor="let tournament of tournaments" class="tournament-card">
-    <h2>{{ tournament.name }}</h2>
-    <p>Début: {{ tournament.begin_at | date: 'dd/MM/yyyy' }}</p>
-    <p>Fin: {{ tournament.end_at | date: 'dd/MM/yyyy' }}</p>
-    <p>Ligue: {{ tournament.league?.name || 'Non spécifié' }}</p>
+<!-- Section Ligues en cours -->
+<section *ngIf="!isLoading && currentLeagues.length > 0" class="current-section">
+  <h2>
+    <mat-icon class="live-icon">live_tv</mat-icon>
+    Ligues en cours
+  </h2>
+  
+  <mat-nav-list>
+    <a mat-list-item 
+       *ngFor="let league of currentLeagues" 
+       [routerLink]="['/league', league.name]">
+      <mat-icon class="league-icon">sports_esports</mat-icon>
+      <span class="league-name">{{ league.name }}</span>
+      <span class="tournament-count">
+        {{ league.currentTournaments.length }} tournoi(s) en cours
+      </span>
+    </a>
+  </mat-nav-list>
+</section>
+
+<!-- Section Toutes les ligues -->
+<section *ngIf="!isLoading && otherLeagues.length > 0" class="other-section">
+  <h2>
+    <mat-icon>sports_score</mat-icon>
+    Toutes les ligues
+  </h2>
+  
+  <mat-nav-list>
+    <a mat-list-item 
+       *ngFor="let league of otherLeagues" 
+       [routerLink]="['/league', league.name]">
+      <mat-icon class="league-icon">videogame_asset</mat-icon>
+      <span class="league-name">{{ league.name }}</span>
+      <span class="tournament-count">
+        {{ league.otherTournaments.length }} tournoi(s)
+      </span>
+    </a>
+  </mat-nav-list>
+</section>
+
+<!-- Loading State -->
+<ng-container *ngIf="isLoading">
+  <div class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Chargement des ligues...</p>
   </div>
-</div>
+</ng-container>
 
-<ng-template #loading>
-  <p>Chargement des tournois...</p>
-</ng-template>
+<!-- Empty State -->
+<ng-container *ngIf="!isLoading && leagues.length === 0">
+  <div class="empty-state">
+    <mat-icon>sentiment_dissatisfied</mat-icon>
+    <p>Aucune ligue disponible actuellement</p>
+  </div>
+</ng-container>

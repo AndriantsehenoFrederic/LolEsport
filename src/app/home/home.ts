@@ -1,33 +1,56 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatListModule } from '@angular/material/list';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { RouterModule } from '@angular/router';
 import { PandaService } from '../services/panda';
-import { CommonModule, DatePipe } from '@angular/common';
-import { MatCard, MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-
 
 @Component({
   selector: 'app-home',
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    DatePipe], // HttpClient n'est plus nécessaire ici
+    MatListModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    RouterModule
+  ],
   templateUrl: './home.html',
+  styleUrls: ['./home.scss']
 })
 export class HomeComponent implements OnInit {
-  tournaments: any[] = [];
+  leagues: any[] = [];
+  currentLeagues: any[] = [];
+  otherLeagues: any[] = [];
+  isLoading = true;
 
   constructor(private pandaService: PandaService) {}
 
   ngOnInit() {
-    this.loadTournaments();
+    this.loadLeagues();
   }
 
-  loadTournaments() {
-    this.pandaService.getTournaments().subscribe({
-      next: (data) => this.tournaments = data as any[],
-      error: (err) => console.error(err)
+  loadLeagues() {
+    this.pandaService.getOrganizedLeagues().subscribe({
+      next: (leagues) => {
+        this.leagues = leagues;
+        this.currentLeagues = leagues.filter(l => l.currentTournaments.length > 0);
+        this.otherLeagues = leagues.filter(l => l.currentTournaments.length === 0);
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Erreur:', err);
+        this.isLoading = false;
+      }
     });
+  }
+
+  // Fonction pour calculer les jours restants (optionnel)
+  getRemainingDays(endDate: string): number {
+    const end = new Date(endDate);
+    const now = new Date();
+    const diff = end.getTime() - now.getTime();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   }
 }
