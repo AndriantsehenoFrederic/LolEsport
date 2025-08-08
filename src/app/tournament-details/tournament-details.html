@@ -1,0 +1,32 @@
+<!-- tournament-details.component.html -->
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>{{ tournament?.name }}</mat-card-title>
+    <mat-card-subtitle>
+      {{ tournament?.begin_at | date }} - {{ tournament?.end_at | date }}
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <h3>Classement</h3>
+    <mat-table [dataSource]="standings">
+      <ng-container matColumnDef="position">
+        <mat-header-cell *matHeaderCellDef>Pos.</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{ element.position }}</mat-cell>
+      </ng-container>
+
+      <!-- Ajoute les autres colonnes -->
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+    </mat-table>
+
+    <h3>Équipes participantes</h3>
+    <div class="teams-grid">
+      <mat-card *ngFor="let team of teams" class="team-card">
+        <img [src]="team.image_url" alt="{{ team.name }}">
+        <h4>{{ team.name }}</h4>
+      </mat-card>
+    </div>
+  </mat-card-content>
+</mat-card>

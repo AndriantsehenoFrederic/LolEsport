@@ -2,8 +2,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../environments/environment';
-import { tap, map } from 'rxjs/operators';
+import { tap, map, switchMap } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
 
+const token= environment.pandascoreToken;
 @Injectable({ providedIn: 'root' })
 export class PandaService {
   private readonly API_URL = 'https://api.pandascore.co';
@@ -79,5 +81,47 @@ getCurrentTournaments() {
       });
     })
   );
+}
+// panda.service.ts
+getLeaguesWithTournaments() {
+  return this.getTournaments().pipe(
+    map(tournaments => {
+      // Grouper par ligue
+      const leaguesMap = new Map<string, any>();
+      tournaments.forEach(t => {
+        const leagueName = t.league?.name || 'Autres';
+        if (!leaguesMap.has(leagueName)) {
+          leaguesMap.set(leagueName, {
+            name: leagueName,
+            tournaments: []
+          });
+        }
+        leaguesMap.get(leagueName).tournaments.push(t);
+      });
+      return Array.from(leaguesMap.values());
+    })
+  );
+}
+
+getTournamentById(id: string) {
+  return this.http.get(`${this.API_URL}/lol/tournaments/${id}`, {
+    params: { token }
+  }).pipe(
+    switchMap(tournament => {
+      return forkJoin({
+        tournament: of(tournament),
+        standings: this.getStandings(id),
+        teams: this.getTeams(id)
+      });
+    })
+  );
+}
+
+private getStandings(tournamentId: string) {
+  return this.http.get(`${this.API_URL}/lol/tournaments/${tournamentId}/standings`);
+}
+
+private getTeams(tournamentId: string) {
+  return this.http.get(`${this.API_URL}/lol/tournaments/${tournamentId}/teams`);
 }
 }

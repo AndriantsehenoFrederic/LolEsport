@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatExpansionModule } from '@angular/material/expansion'; // Nouvel import
 import { RouterModule } from '@angular/router';
 import { PandaService } from '../services/panda';
 
@@ -14,6 +15,7 @@ import { PandaService } from '../services/panda';
     MatListModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatExpansionModule, // Ajouté pour l'accordéon
     RouterModule
   ],
   templateUrl: './home.html',
@@ -24,6 +26,7 @@ export class HomeComponent implements OnInit {
   currentLeagues: any[] = [];
   otherLeagues: any[] = [];
   isLoading = true;
+  expandedPanel: string | null = null; // Pour gérer l'ouverture des panels
 
   constructor(private pandaService: PandaService) {}
 
@@ -38,6 +41,11 @@ export class HomeComponent implements OnInit {
         this.currentLeagues = leagues.filter(l => l.currentTournaments.length > 0);
         this.otherLeagues = leagues.filter(l => l.currentTournaments.length === 0);
         this.isLoading = false;
+        
+        // Ouvrir automatiquement la première ligue en cours
+        if (this.currentLeagues.length > 0) {
+          this.expandedPanel = this.currentLeagues[0].name;
+        }
       },
       error: (err) => {
         console.error('Erreur:', err);
@@ -46,7 +54,10 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  // Fonction pour calculer les jours restants (optionnel)
+  togglePanel(leagueName: string): void {
+    this.expandedPanel = this.expandedPanel === leagueName ? null : leagueName;
+  }
+
   getRemainingDays(endDate: string): number {
     const end = new Date(endDate);
     const now = new Date();

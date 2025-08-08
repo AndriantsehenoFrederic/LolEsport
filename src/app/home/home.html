@@ -7,17 +7,37 @@
     Ligues en cours
   </h2>
   
-  <mat-nav-list>
-    <a mat-list-item 
-       *ngFor="let league of currentLeagues" 
-       [routerLink]="['/league', league.name]">
-      <mat-icon class="league-icon">sports_esports</mat-icon>
-      <span class="league-name">{{ league.name }}</span>
-      <span class="tournament-count">
-        {{ league.currentTournaments.length }} tournoi(s) en cours
-      </span>
-    </a>
-  </mat-nav-list>
+  <mat-accordion>
+    <mat-expansion-panel *ngFor="let league of currentLeagues" 
+                        [expanded]="expandedPanel === league.name"
+                        (opened)="expandedPanel = league.name"
+                        (closed)="expandedPanel = null">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>sports_esports</mat-icon>
+          {{ league.name }}
+        </mat-panel-title>
+        <mat-panel-description>
+          {{ league.currentTournaments.length }} tournoi(s) en cours
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <mat-nav-list>
+        <a mat-list-item 
+           *ngFor="let tournament of league.currentTournaments"
+           [routerLink]="['/tournament', tournament.id]">
+          <mat-icon>emoji_events</mat-icon>
+          {{ tournament.name }}
+          <span class="tournament-meta">
+            ({{ tournament.begin_at | date:'shortDate' }} - {{ tournament.end_at | date:'shortDate' }})
+          </span>
+          <span class="days-remaining">
+            {{ getRemainingDays(tournament.end_at) }} jours restants
+          </span>
+        </a>
+      </mat-nav-list>
+    </mat-expansion-panel>
+  </mat-accordion>
 </section>
 
 <!-- Section Toutes les ligues -->
@@ -27,20 +47,37 @@
     Toutes les ligues
   </h2>
   
-  <mat-nav-list>
-    <a mat-list-item 
-       *ngFor="let league of otherLeagues" 
-       [routerLink]="['/league', league.name]">
-      <mat-icon class="league-icon">videogame_asset</mat-icon>
-      <span class="league-name">{{ league.name }}</span>
-      <span class="tournament-count">
-        {{ league.otherTournaments.length }} tournoi(s)
-      </span>
-    </a>
-  </mat-nav-list>
+  <mat-accordion>
+    <mat-expansion-panel *ngFor="let league of otherLeagues"
+                        [expanded]="expandedPanel === league.name"
+                        (opened)="expandedPanel = league.name"
+                        (closed)="expandedPanel = null">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>videogame_asset</mat-icon>
+          {{ league.name }}
+        </mat-panel-title>
+        <mat-panel-description>
+          {{ league.otherTournaments.length }} tournoi(s)
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <mat-nav-list>
+        <a mat-list-item 
+           *ngFor="let tournament of league.otherTournaments"
+           [routerLink]="['/tournament', tournament.id]">
+          <mat-icon>tournament</mat-icon>
+          {{ tournament.name }}
+          <span class="tournament-meta">
+            ({{ tournament.begin_at | date:'shortDate' }} - {{ tournament.end_at | date:'shortDate' }})
+          </span>
+        </a>
+      </mat-nav-list>
+    </mat-expansion-panel>
+  </mat-accordion>
 </section>
 
-<!-- Loading State -->
+<!-- États de chargement -->
 <ng-container *ngIf="isLoading">
   <div class="loading-container">
     <mat-spinner diameter="50"></mat-spinner>
@@ -48,7 +85,6 @@
   </div>
 </ng-container>
 
-<!-- Empty State -->
 <ng-container *ngIf="!isLoading && leagues.length === 0">
   <div class="empty-state">
     <mat-icon>sentiment_dissatisfied</mat-icon>
